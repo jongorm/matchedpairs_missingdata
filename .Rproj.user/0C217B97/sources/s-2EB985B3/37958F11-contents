@@ -1,0 +1,48 @@
+
+library(car)
+library(VIF)
+library(glmnet)
+library(corrplot)
+
+df <- read.csv("D:\\Data\\Office_Docs\\Excel\\test_JBB.csv", header=TRUE)
+
+df_status <- df[c(df$UH_Loop_Status!=""),]
+str(df_status)
+
+df_ref <- df[c(df$UH_LOOP_LOAD!=0),]
+
+df_status2 <- df[c(df$UH_Loop_Status=="ON"),]
+
+typeof(df_ref$UH_Loop_DT)
+
+#cols.num <- c("UH_LOOP_LOAD", "UH_Loop_DT", "Upper_House_SEC_Ret_Temp", "Upper_House_SEC_Sup_Temp", "UH_Loop_GPM", "HDD", "OA_DB_Temp")
+#df_ref[cols.num] <- sapply(df[cols.num], double)
+colnames(df_ref)
+str(df_ref)
+
+drops <- c("UH_Loop_Status")
+df_ref <- df_ref[ , !(names(df_ref) %in% drops)]
+
+df_ref$UH_Loop_GPM <- as.numeric(gsub(",", "",df_ref$UH_Loop_GPM))
+df_ref$UH_LOOP_LOAD <- as.numeric(gsub(",", "",df_ref$UH_LOOP_LOAD))
+df_status$UH_Loop_GPM <- as.numeric(gsub(",", "",df_status$UH_Loop_GPM))
+df_status$UH_LOOP_LOAD <- as.numeric(gsub(",", "",df_status$UH_LOOP_LOAD))
+df_status$UH_Loop_Status <- as.factor(df_status$UH_Loop_Status)
+str(df_ref)
+str(df_stat)
+
+corrplot(cor(df_ref))
+
+model <- lm(UH_LOOP_LOAD ~ UH_Loop_DT + HDD + Upper_House_SEC_Ret_Temp + UH_Loop_GPM, data=df_ref)
+summary(model)
+plot(model)
+vif(model)
+
+model_status <- lm(UH_LOOP_LOAD ~ UH_Loop_DT + HDD + Upper_House_SEC_Ret_Temp + UH_Loop_Status, data=df_status)
+summary(model_status)
+vif(model_status)
+plot(model_status)
+
+model_status2 <- lm(UH_LOOP_LOAD ~ UH_Loop_DT + HDD + Upper_House_SEC_Ret_Temp + UH_Loop_GPM, data=df_status2)
+summary(model_status2)
+

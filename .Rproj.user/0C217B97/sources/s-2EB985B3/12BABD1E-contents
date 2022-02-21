@@ -1,0 +1,67 @@
+rm(list=ls)
+
+library(mice)
+library(corrplot)
+library(MASS)
+library(leaps)
+library(broom)
+
+library(mice)
+lst = read.table("C:\\Users\\bsterling\\Desktop\\Stony Brook\\AMS 578\\Project\\Others_cleaned_data\\036895.csv",header = TRUE, sep=",")
+
+output = complete(mice(lst,method="cart"))
+anyNA(output)
+corrplot(cor(output))
+
+for(i in 1:32){
+  if(i %in% 7:31){
+    output[,i] = as.integer(output[,i])
+  }else{
+    output[,i] = as.numeric(output[,i])
+  }
+}
+
+
+first_model = lm(Y ~ I(R6 * R7 * R19), data = output)
+output$new_data = output$Y - first_model$coefficients[1] - first_model$coefficients[2] * output$R6 * output$R7 * output$R19
+
+second_model = lm(new_data ~ R7, data = output)
+output$new_data = output$new_data - second_model$coefficients[1] - second_model$coefficients[2] * output$R7
+
+third_model = lm(new_data ~ R19, data = output)
+output$new_data = output$new_data - third_model$coefficients[1] - third_model$coefficients[2] * output$R19
+
+fourth_model = lm(new_data ~ R6, data = output)
+output$new_data = output$new_data - fourth_model$coefficients[1] - fourth_model$coefficients[2] * output$R6
+
+boxcox(lm(I(new_data + 3e10)~.-Y-Y_,data=output))
+output$Y_ = log(output$new_data - min(output$new_data) + 2)
+boxcox(lm(Y_~.-Y-new_data,data=output))
+
+summary(lm(Y ~ I(R6 * R7 * R19),data=output))
+summary(lm(Y ~ R6 + R7 + R19,data=output))
+
+summary(regsubsets(Y ~ R6 + R7 + R19 + I(R6*R7) + I(R7*R19) + I(R6*R19) + I(R6*R7*R19), data=output,nvmax=5,method="seqrep"))
+summary(regsubsets(Y ~ I(R6*R7*R19) + I(R6*R7*R19*E6), data=output,nvmax=5,method="seqrep"))
+
+shapiro.test((output$new_data[output$R11 == 1]))
+
+summary(lm(new_data~.-Y,data=output))
+
+shapiro.test(output$new_data)
+
+qqnorm(output$new_data[output$R19 == 1])
+qqline(output$new_data[output$R19 == 1])
+
+qqnorm(output$new_data[output$R6 == 1 & output$R7 == 1 & output$R19 == 1])
+qqline(output$new_data[output$R6 == 1 & output$R7 == 1 & output$R19 == 1])
+
+qqnorm(output$new_data)
+qqline(output$new_data)
+library(limma)
+qqt((output$new_data - mean(output$new_data))/sd(output$new_data),1)
+qqline(output$new_data)
+
+hist(pt(abs(output$new_data)/sd(abs(output$new_data)), 1000))
+
+boxcox(lm(new_data + 4e10~.-Y-Y_, data=output))

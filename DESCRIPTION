@@ -1,0 +1,15 @@
+Package: PMGorman
+Type: Package
+Title: Tests for Partially Matched Samples
+Version: 0.1.0
+Author: Jonathan Gorman
+Maintainer: Jonathan Gorman <jonathan.gorman@stonybrook.edu>
+Description: Provides tests for analyzing partially matched samples.
+License: Glp3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
