@@ -19,7 +19,7 @@ library(PMGorman)
 
 # Setup
 
-The package 'PMGorman' is not currently available on any repositories, so the source should be downloaded and imported into the user's R environment. Installation can be performed as follows:
+The package 'PMGorman' is not currently available on CRAN, so the source should be downloaded and imported into the user's R environment. Installation can be performed as follows:
 ```
 > install.packages('file_absolute_pathname', repos=NULL, type='source')
 
